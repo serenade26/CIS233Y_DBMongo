@@ -2,8 +2,8 @@
 
 File: LanguageExposure.py
 Author: Alexander Leykand
-Date: 05/07/2026
-Assignment: Module 5
+Date: 05/14/2026
+Assignment: Module 6
 
 This module defines the LanguageExposure class, which extends the
 Language class by adding information about a user's experience with
@@ -26,34 +26,44 @@ class LanguageExposure(Language):
     __version_last_used = ""
 
     def __init__(self, name, application_domain, programming_paradigm,
-                 execution_method, typing, year_last_used, years_of_exposure, version_last_used):
+                 execution_method, typing, year_last_used, years_of_exposure, version_last_used, save=False):
         """Initialize a LanguageExposure object.
 
-        Parameters:
+        Args:
             name (str): The name of the programming language.
-            application_domain (str): The primary domain in which the
-                language is used.
-            programming_paradigm (str): The programming paradigm supported
-                by the language.
-            execution_method (str): How the language is executed
-                (e.g., compiled or interpreted).
-            typing (str): The typing discipline of the language
-                (e.g., static or dynamic).
-            year_last_used (int): The most recent year the language
-                was used.
-            years_of_exposure (float): Total number of years of
+            application_domain (str): The primary domain in
+                which the language is commonly used.
+            programming_paradigm (str): The programming
+                paradigm supported by the language.
+            execution_method (str): How the language is
+                executed, such as compiled or interpreted.
+            typing (str): The typing discipline of the
+                language, such as static or dynamic.
+            year_last_used (int): The most recent year in
+                which the language was used.
+            years_of_exposure (float): Total years of
                 experience with the language.
-            version_last_used (str): The specific version of the
-                language last used.
+            version_last_used (str): The specific language
+                version most recently used.
+            save (bool): Whether the object should be
+                immediately persisted to the database.
         """
         self.__year_last_used = year_last_used
         self.__years_of_exposure = years_of_exposure
         self.__version_last_used = version_last_used
         super().__init__(name, application_domain, programming_paradigm,
-                         execution_method, typing)
+                         execution_method, typing, save=save)
 
     def to_dict(self):
-        """Return a dictionary representation of the LanguageExposure object."""
+        """Return a dictionary representation of the LanguageExposure object.
+
+        Extends the base Language dictionary representation
+        with exposure-specific attributes for MongoDB
+        persistence.
+
+        Returns:
+            dict: Serialized LanguageExposure object data.
+        """
         dict = super().to_dict()
         dict["year_last_used"] = self.__year_last_used
         dict["years_of_exposure"] = self.__years_of_exposure

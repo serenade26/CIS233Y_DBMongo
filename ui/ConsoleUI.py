@@ -2,8 +2,8 @@
 
 File: ConsoleUI.py
 Author: Alexander Leykand
-Date: 04/29/2026
-Assignment: Module 4
+Date: 05/14/2026
+Assignment: Module 6
 
 This module defines the ConsoleUI class, which provides a simple
 command-line interface for interacting with Language, LanguageList,
@@ -31,13 +31,14 @@ class ConsoleUI:
 
     @classmethod
     def init(cls):
-        """Initialize the ConsoleUI data.
+        """Load language and languagelist data into the UI layer.
 
-        Retrieves all available Language and LanguageList objects
-        from the data source for use in the UI.
+        Retrieves persisted Language and LanguageList objects
+        from the configured data source and stores them for
+        interactive use within the console application.
         """
 
-        cls.__all_languages, cls.__all_languagelists = LanguageList.get_languagelists()
+        cls.__all_languages, cls.__all_languagelists = LanguageList.read_data()
 
     @classmethod
     def select_language(cls, prompt, languagelist=None):
@@ -120,27 +121,39 @@ class ConsoleUI:
 
     @classmethod
     def create_languagelist(cls):
-        """Create a new LanguageList."""
-        name = input_string(prompt="Enter a language list name or 'None' to exit:", error="Cannot be empty")
+        """Create and register a new LanguageList.
+
+        Prompts the user for a list name and description,
+        validates that the name is unique, creates the
+        LanguageList object, and stores it in the active
+        collection.
+        """
+        name = input_string(prompt="Enter a language list name or 'None' to exit: (string)", error="Cannot be empty")
         if name.lower() != "none":
             languagelist = LanguageList.lookup(name.lower())
             if languagelist is not None:
                 print("Error: Language list already exists!")
                 return
-            description = input_string(prompt="Enter a language list description:", valid=lambda x: True)  # allow empty
-            languagelist = LanguageList(name, [], description)
+            description = input_string(prompt="Enter a language list description: (optional string)", valid=lambda x: True)  # allow empty
+            languagelist = LanguageList(name, [], description, save=True)
             cls.__all_languagelists.append(languagelist)
             print(f"Language List {languagelist.get_name()} created")
 
     @classmethod
     def delete_languagelist(cls):
-        """Delete a LanguageList."""
+        """Delete an existing LanguageList.
+
+        Prompts the user to select a language list,
+        removes it from the active collection, and
+        unregisters it from the lookup registry.
+        """
         languagelist = cls.select_languagelist("Select Language List to delete or 'None' to exit: ")
         if languagelist is None:
             return
         deleted = languagelist.get_name()
         cls.__all_languagelists.remove(languagelist)
         languagelist.delete()
+
         print(f"Language List {deleted} deleted")
 
     @classmethod
@@ -158,31 +171,44 @@ class ConsoleUI:
 
     @classmethod
     def create_language(cls):
-        """Create a new Language or LanguageExposure object."""
+        """Create a new Language or LanguageExposure object.
+
+        Prompts the user for language attributes and
+        optionally collects exposure-related information
+        when creating a LanguageExposure instance. The new
+        object is registered and added to the active
+        language collection.
+        """
         language_exposure = y_or_n(prompt="Did you have any experience with this the language (y/n): ")
 
-        name = input_string(prompt="Enter a language name: ")
+        name = input_string(prompt="Enter a language name: (string)")
         if Language.lookup(name) is not None:
             print("Error: Language already exists!")
             return
-        application_domain = input_string(prompt="Enter its application domain: ")
-        programming_paradigm = input_string(prompt="Enter its programming paradigm: ")
-        execution_method = input_string(prompt="Enter its execution method: ")
-        typing = input_string(prompt="Enter its typing: ")
+        application_domain = input_string(prompt="Enter its application domain: (string)")
+        programming_paradigm = input_string(prompt="Enter its programming paradigm: (string)")
+        execution_method = input_string(prompt="Enter its execution method: (string)")
+        typing = input_string(prompt="Enter its typing: (string)")
         if language_exposure:
-            year_last_used = input_int(prompt="Enter year last used: ", ge=1940, lt=2100)
-            years_of_exposure = input_float(prompt="How many years used: ", gt=0, lt=100)
-            version_last_used = input_string("Last version used: ", valid=lambda x: True)  # allow empty
+            year_last_used = input_int(prompt="Enter year last used: (integer)", ge=1940, lt=2100)
+            years_of_exposure = input_float(prompt="How many years used: (decimal)", gt=0, lt=100)
+            version_last_used = input_string("Last version used: (string)", valid=lambda x: True)  # allow empty
             language = LanguageExposure(name, application_domain, programming_paradigm, execution_method,
-                                        typing, year_last_used, years_of_exposure, version_last_used)
+                                        typing, year_last_used, years_of_exposure, version_last_used, save=True)
         else:
-            language = Language(name, application_domain, programming_paradigm, execution_method, typing)
+            language = Language(name, application_domain, programming_paradigm, execution_method, typing, save=True)
         cls.__all_languages.append(language)
         print(f"Language {language.get_name()} created")
 
     @classmethod
     def delete_language(cls):
-        """Delete a Language and remove it from all lists."""
+        """Delete a Language from the application.
+
+        Removes the selected Language from all LanguageList
+        objects that contain it, unregisters the Language
+        from the lookup registry, and deletes its persisted
+        data.
+        """
         language = cls.select_language("Select Language to Delete: ")
         if language is not None:
             for languagelist in cls.__all_languagelists:
@@ -194,7 +220,12 @@ class ConsoleUI:
 
     @classmethod
     def add_language(cls):
-        """Add a Language to a selected LanguageList."""
+        """Add a Language to a selected LanguageList.
+
+        Prompts the user to select both a LanguageList and
+        a Language. Prevents duplicate membership within
+        the target list.
+        """
         languagelist = cls.select_languagelist("Select Language List to add Language to or 'None' to exit")
         if languagelist is not None:
             language = cls.select_language("Select the Language to add: ")
@@ -207,7 +238,12 @@ class ConsoleUI:
 
     @classmethod
     def remove_language(cls):
-        """Remove a Language from a selected LanguageList."""
+        """Remove a Language from a selected LanguageList.
+
+        Prompts the user to select a LanguageList and one
+        of its associated languages, then removes the
+        selected Language from the list.
+        """
         languagelist = cls.select_languagelist("Select a Language List to remove a Language from or 'None' to exit")
         if languagelist is not None:
             language = cls.select_language("Select the Language to remove: ", languagelist=languagelist)
@@ -220,16 +256,25 @@ class ConsoleUI:
 
     @classmethod
     def update_language(cls):
-        """Update an existing Language."""
+        """Update the application domain of an existing Language.
+
+        Prompts the user to select a Language object and
+        enter a new application domain value.
+        """
         language = cls.select_language("Select the Language to update or 'None' to exit")
         if language is not None:
-            application_domain = input_string(prompt="Enter its application domain: ")
+            application_domain = input_string(prompt="Enter its application domain: (string)")
             language.update_application_domain(application_domain)
             print("Language updated!")
 
     @classmethod
     def join_languagelists(cls):
-        """Merge two LanguageLists into a new one."""
+        """Merge two LanguageLists into a new combined list.
+
+        Creates a new LanguageList containing the unique
+        Language objects from both selected lists and adds
+        the merged list to the active collection.
+        """
         languagelist1 = cls.select_languagelist("Select the first Language List to join or 'None' to exit",
                                                 include_all_languagelists=True)
         if languagelist1 is not None:

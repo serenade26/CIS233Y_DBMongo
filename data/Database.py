@@ -2,8 +2,8 @@
 
 File: Database.py
 Author: Alexander Leykand
-Date: 05/07/2026
-Assignment: Module 5
+Date: 05/14/2026
+Assignment: Module 6
 
 Provides MongoDB-backed storage and seed data for language objects.
 
@@ -21,13 +21,12 @@ from pymongo.server_api import ServerApi
 
 
 class Database:
-    """Manage MongoDB connectivity and seed language catalog data.
+    """Manage MongoDB persistence for language catalog data.
 
-    This class provides:
-        - MongoDB connection management
-        - Database/collection initialization
-        - Rebuilding seed data
-        - Factory methods for predefined language objects
+    This class provides centralized access to MongoDB
+    connectivity, collection management, seed data creation,
+    and CRUD-style persistence operations for Language and
+    LanguageList objects.
     """
     PASSWORD = 'CIS233Y'
     USER = 'alexanderleykand'
@@ -57,10 +56,10 @@ class Database:
             cls.__languages_collection = cls.__database.Languages
             cls.__languagelists_collection = cls.__database.LanguageLists
 
-            print("Connection: ", cls.__connection)
+        """ print("Connection: ", cls.__connection)
             print("Database: ", cls.__database)
             print("Languages collection: ", cls.__languages_collection)
-            print("LanguageLists collection: ", cls.__languagelists_collection)
+            print("LanguageLists collection: ", cls.__languagelists_collection) """
 
     @classmethod
     def rebuild_data(cls):
@@ -86,6 +85,30 @@ class Database:
         cls.__languages_collection.insert_many(language_dict)
         languagelist_dict = [languagelist.to_dict() for languagelist in all_languagelists]
         cls.__languagelists_collection.insert_many(languagelist_dict)
+
+    @classmethod
+    def read_data(cls):
+        """Retrieve persisted Language and LanguageList data.
+
+        Loads Language and LanguageList documents from MongoDB,
+        reconstructs their corresponding Python objects, and
+        restores object relationships through lookup mappings.
+
+        Returns:
+            tuple:
+                - LanguageList: The master "All Languages" list.
+                - list[LanguageList]: All persisted LanguageList
+                  objects.
+        """
+        cls.connect()
+        language_dicts = list(cls.__languages_collection.find())  # make a list from iterable to iterate repeatedly
+        languages = [Language.build(language_dict) for language_dict in language_dicts]
+
+        languagelist_dicts = list(
+            cls.__languagelists_collection.find())  # make a list from iterable to iterate repeatedly
+        languagelists = [LanguageList.build(languagelist_dict) for languagelist_dict in languagelist_dicts]
+
+        return LanguageList.lookup(LanguageList.ALL_LANGUAGES), languagelists
 
     @classmethod
     def get_data(cls):
@@ -115,6 +138,64 @@ class Database:
                            "All Languages")
         return all, [all, systems, general]
 
+    @classmethod
+    def save_languagelist(cls, languagelist):
+        """Insert or update a LanguageList document in MongoDB.
+
+        Persists the provided LanguageList object using its
+        lookup key as the MongoDB document identifier. Existing
+        documents are updated and missing documents are created.
+
+        Args:
+            languagelist (LanguageList): The LanguageList object
+                to persist.
+        """
+        cls.connect()
+        cls.__languagelists_collection.update_one({"_id": languagelist.get_key()}, {"$set": languagelist.to_dict()}, upsert=True)
+
+    @classmethod
+    def save_language(cls, language):
+        """Insert or update a Language document in MongoDB.
+
+        Persists the provided Language object using its lookup
+        key as the MongoDB document identifier. Existing
+        documents are updated and missing documents are created.
+
+        Args:
+            language (Language): The Language object to persist.
+        """
+        cls.connect()
+        cls.__languages_collection.update_one({"_id": language.get_key()}, {"$set": language.to_dict()}, upsert=True)
+
+    @classmethod
+    def delete_languagelist(cls, languagelist):
+        """Delete a LanguageList document from MongoDB.
+
+        Removes the document associated with the provided
+        LanguageList object's lookup key.
+
+        Args:
+            languagelist (LanguageList): The LanguageList object
+                to delete.
+        """
+        cls.connect()
+        cls.__languagelists_collection.delete_one({"_id": languagelist.get_key()})
+
+    @classmethod
+    def delete_language(cls, language):
+        """Delete a Language document from MongoDB.
+
+        Removes the document associated with the provided
+        Language object's lookup key.
+
+        Args:
+            language (Language): The Language object to delete.
+        """
+        cls.connect()
+        cls.__languages_collection.delete_one({"_id": language.get_key()})
+
 
 if __name__ == '__main__':
+    # Establish a database connection when the module
+    # is executed directly.
     Database.connect()
