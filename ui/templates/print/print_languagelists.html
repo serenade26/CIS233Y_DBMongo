@@ -1,0 +1,10 @@
+{% extends "default.html" %}
+{% block title %}Print Language Lists{%  endblock %}
+{%  block header %}All Language Lists:{%  endblock %}
+{% block content %}
+<ul>
+    {% for languagelist in languagelists %}
+        <li><a href="/print_languagelist?languagelist={{ languagelist.get_key() }}">{{languagelist.get_name()}}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

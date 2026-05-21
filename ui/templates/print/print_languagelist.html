@@ -1,0 +1,12 @@
+{% extends "default.html" %}
+{% block title %}{{ languagelist.get_name() }} Language List{% endblock %}
+{%  block header %}{{ languagelist.get_name() }} Language List{% endblock %}
+{% block content %}
+    <p>Description: {{ languagelist.get_description() }}</p>
+    <h2>Languages in the List:</h2>
+    <ul>
+    {% for language in languagelist %}
+    <li>{{ language.to_html()|safe }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

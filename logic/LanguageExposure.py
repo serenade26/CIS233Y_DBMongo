@@ -2,8 +2,8 @@
 
 File: LanguageExposure.py
 Author: Alexander Leykand
-Date: 05/14/2026
-Assignment: Module 6
+Date: 05/21/2026
+Assignment: Module 7
 
 This module defines the LanguageExposure class, which extends the
 Language class by adding information about a user's experience with
@@ -81,3 +81,16 @@ class LanguageExposure(Language):
         s = super().__str__()
         return (s + f"\nLast used in {self.__year_last_used} "
                 f"for {self.__years_of_exposure} years {self.__version_last_used} version")
+
+    def to_html(self):
+        """Return an HTML-formatted representation of the language exposure.
+
+        Extends the base Language HTML representation with additional
+        formatting that displays user exposure details such as the
+        last year used and the version last used.
+
+        Returns:
+            str: An HTML-formatted description of the language exposure.
+        """
+        html = super().to_html()
+        return html + f"<br><i>I used it last in {self.__year_last_used} and the version was {self.__version_last_used}</i>"

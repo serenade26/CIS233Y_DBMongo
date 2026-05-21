@@ -2,8 +2,8 @@
 
 File: Language.py
 Author: Alexander Leykand
-Date: 05/14/2026
-Assignment: Module 6
+Date: 05/21/2026
+Assignment: Module 7
 
 This module defines the Language class, which represents a programming
 language and its core characteristics, such as application domain,
@@ -176,6 +176,20 @@ class Language:
         return (f"<{self.__name} used in {self.__application_domain} environment as"
                 f" {self.__programming_paradigm}"
                 f" language, executed as {self.__execution_method} with {self.__typing} typing >")
+
+    def to_html(self):
+        """Return an HTML-formatted representation of the language.
+
+        The generated HTML string is intended for rendering in
+        Flask/Jinja templates and includes basic formatting tags
+        describing the language and its characteristics.
+
+        Returns:
+            str: An HTML-formatted description of the language.
+        """
+        return (f"<strong>{self.__name}</strong> used in {self.__application_domain} environment as"
+                f" {self.__programming_paradigm}"
+                f" language, executed as {self.__execution_method} with {self.__typing} typing")
 
     @staticmethod
     def get_languages():
