@@ -1,0 +1,12 @@
+.data_entry_form th {
+    text-align: right;
+}
+.data_entry_form td {
+    text-align: left;
+}
+.data_entry_form input[type="text"] {
+    width: 400px;
+}
+.data_entry_form {
+    padding: 2em;
+}

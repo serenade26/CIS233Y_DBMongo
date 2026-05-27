@@ -1,0 +1,6 @@
+{% extends "default.html" %}
+{% block title %}Language {{ language.get_name() }} created{%  endblock %}
+{% block header %}New Language characteristics:{% endblock %}
+{% block content %}
+<p> {{ language.to_html()|safe }}
+{% endblock %}

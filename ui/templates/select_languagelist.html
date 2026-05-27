@@ -1,0 +1,5 @@
+<select name="{{ select_name }}">
+    {% for languagelist in languagelists %}
+        <option value="{{ languagelist.get_key()}}">{{ languagelist.get_name() }}</option>
+    {% endfor %}
+</select>

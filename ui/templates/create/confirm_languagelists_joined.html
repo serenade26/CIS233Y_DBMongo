@@ -1,0 +1,13 @@
+{% extends "default.html" %}
+{% block title %}Language List {{ new_languagelist.get_name() }} created{%  endblock %}
+{% block header %}New Language List name/description are:{% endblock %}
+{% block content %}
+<p> {{ new_languagelist.get_name() }} / {{ new_languagelist.get_description() }}
+<br> The existing playlists joined: {{ first_languagelist.get_name() }} and {{ second_languagelist.get_name() }}
+<h2>Languages:</h2>
+    <ul>
+    {% for language in new_languagelist %}
+    <li>{{ language.to_html()|safe }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,5 @@
+<select name="{{ select_name }}">
+    {% for language in languages %}
+        <option value="{{ language.get_key()}}">{{ language.get_name() }} {% print(language) %}</option>
+    {% endfor %}
+</select>

@@ -1,0 +1,18 @@
+{% extends "default.html" %}
+{% block title %}Join Two Language Lists{%  endblock %}
+{%  block header %}Select two Language Lists to join:{%  endblock %}
+{% block content %}
+    <form method="POST" action="do_join_languagelist">
+        <table class="data_entry_form">
+            <tr><th><label>First Language List:</label></th><td>
+                {% set select_name="first_languagelist" %}
+                {% include "select_languagelist.html" %}
+            </td></tr>
+            <tr><th><label>Second Language List:</label></th><td>
+                {% set select_name="second_languagelist" %}
+                {% include "select_languagelist.html" %}
+            </td></tr>
+            <tr><th colspan="2"><button type="submit">JOIN</button></th></tr>
+        </table>
+    </form>
+{% endblock %}

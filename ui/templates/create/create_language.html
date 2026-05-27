@@ -1,0 +1,15 @@
+{% extends "default.html" %}
+{% block title %}Create a new Language{%  endblock %}
+{% block header %}Please enter the Language information:{% endblock %}
+{% block content %}
+    <form method="POST" action="do_create_language">
+        <table class="data_entry_form">
+            <tr><th><label>Name:</label></th><td><input type="text" name="name"></td></tr>
+            <tr><th><label>Application Domain:</label></th><td><input type="text" name="application_domain"></td></tr>
+            <tr><th><label>Programming Paradigm:</label></th><td><input type="text" name="programming_paradigm"></td></tr>
+            <tr><th><label>Execution Method:</label></th><td><input type="text" name="execution_method"></td></tr>
+            <tr><th><label>Typing:</label></th><td><input type="text" name="typing"></td></tr>
+            <tr><th colspan="2"><button type="submit">CREATE</button></th></tr>
+        </table>
+    </form>
+{% endblock %}

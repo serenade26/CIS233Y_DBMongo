@@ -1,0 +1,6 @@
+{% extends "default.html" %}
+{% block title %}Language {{ language.get_name() }} with exposure created{%  endblock %}
+{% block header %}New Language w/exposure characteristics:{% endblock %}
+{% block content %}
+<p> {{ language.to_html()|safe }}
+{% endblock %}

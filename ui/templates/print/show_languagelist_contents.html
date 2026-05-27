@@ -1,0 +1,14 @@
+{% extends "default.html" %}
+{% block title %}Show Language List{%  endblock %}
+{%  block header %}Select a Language Lists to show:{%  endblock %}
+{% block content %}
+    <form method="GET" action="print_languagelist">
+        <table class="data_entry_form">
+            <tr><th><label>Language List:</label></th><td>
+                {% set select_name="languagelist" %}
+                {% include "select_languagelist.html" %}
+            </td></tr>
+            <tr><th colspan="2"><button type="submit">SHOW</button></th></tr>
+        </table>
+    </form>
+{% endblock %}

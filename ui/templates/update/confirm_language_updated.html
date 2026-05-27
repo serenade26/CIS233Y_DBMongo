@@ -1,0 +1,7 @@
+{% extends "default.html" %}
+{% block title %} Language Updated {% endblock %}
+{%  block header %}{{ language.get_name() }} Language was updated{% endblock %}
+{% block content %}
+    <p>The updated Language information:</p>
+    {{ language.to_html()|safe }}
+{% endblock %}
