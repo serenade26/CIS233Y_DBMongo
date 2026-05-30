@@ -415,8 +415,10 @@ class WebUI:
             return render_template("error.html", message_header=f"Language List {languagelist_key} does not exist",
                                    message_body=f"Language List {languagelist_key} was not found. Choose another one.")
         if language in languagelist:
-            return render_template("error.html", message_header=f"Language {language.get_name()} already in Language List",
-                                   message_body=f"Language {language.get_name()} already exists in Language List {languagelist.get_name()}.")
+            return render_template("error.html", message_header=f"Language {language.get_name()} already in Language "
+                                                                f"List",
+                                   message_body=f"Language {language.get_name()} already exists in Language "
+                                                f"List {languagelist.get_name()}.")
         languagelist.append(language)
         return render_template("update/confirm_language_added_to_languagelist.html",
                                language=language, languagelist=languagelist)
@@ -433,7 +435,6 @@ class WebUI:
         return render_template('update/remove_language_from_languagelist.html',
                                languages=WebUI.__all_languages,
                                languagelists=WebUI.__all_languagelists)
-
 
     @staticmethod
     @__app.route('/do_remove_language_from_languagelist', methods=['GET', 'POST'])
@@ -463,10 +464,13 @@ class WebUI:
                                    message_body=f"Language List {languagelist_key} was not found. Choose another one.")
         if languagelist.get_name() == LanguageList.ALL_LANGUAGES:
             return render_template("error.html", message_header="Cannot remove the Language",
-                                   message_body=f"Language is not allowed to be removed from {LanguageList.ALL_LANGUAGES} Language List.")
+                                   message_body=f"Language is not allowed to be removed " 
+                                                f"from {LanguageList.ALL_LANGUAGES} Language List.")
         if language not in languagelist:
-            return render_template("error.html", message_header=f"Language {language.get_name()} is not in Language List",
-                                   message_body=f"Language {language.get_name()} does not exist in Language List {languagelist.get_name()}.")
+            return render_template("error.html",
+                                   message_header=f"Language {language.get_name()} is not in Language List",
+                                   message_body=f"Language {language.get_name()} does not exist in Language "
+                                                f"List {languagelist.get_name()}.")
         languagelist.remove(language)
         return render_template("update/confirm_language_removed_from_languagelist.html",
                                language=language, languagelist=languagelist)
