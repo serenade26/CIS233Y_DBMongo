@@ -1,0 +1,14 @@
+{% extends "default.html" %}
+{% block title %}Delete Language{%  endblock %}
+{%  block header %}Select a Language to delete:{%  endblock %}
+{% block content %}
+    <form method="POST" action="do_delete_language">
+        <table class="data_entry_form">
+            <tr><th><label>Language:</label></th><td>
+                {% set select_name="language" %}
+                {% include "select_language.html" %}
+            </td></tr>
+            <tr><th colspan="2"><button type="submit">DELETE</button></th></tr>
+        </table>
+    </form>
+{% endblock %}

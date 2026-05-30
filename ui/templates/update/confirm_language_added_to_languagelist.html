@@ -1,0 +1,6 @@
+{% extends "default.html" %}
+{% block title %}Language added to Language List{%  endblock %}
+{% block header %}Language added to Language List{% endblock %}
+{% block content %}
+<p> Language {{ language.get_name() }} was added to the Language List {{ languagelist.get_name() }}
+{% endblock %}

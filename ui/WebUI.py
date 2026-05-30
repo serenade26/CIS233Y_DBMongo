@@ -1,9 +1,9 @@
 """WebUI class module.
 
-File: Language.py
+File: WebUI.py
 Author: Alexander Leykand
-Date: 05/21/2026
-Assignment: Module 7
+Date: 05/30/2026
+Assignment: Module 8
 
 This module defines the WebUI class, which manages browser-based
 interaction with Language and LanguageList objects using the
@@ -62,6 +62,19 @@ class WebUI:
 
     @classmethod
     def validate_input(cls, field_name):
+        """Validate a submitted form field.
+
+        Checks whether the specified field exists in the
+        submitted form data and contains a non-blank value.
+
+        Args:
+            field_name (str): Name of the form field.
+
+        Returns:
+            tuple: A pair containing the validated field value
+            and None if validation succeeds, or None and a
+            rendered error page if validation fails.
+        """
         if field_name not in request.form:
             return None, render_template("error.html", message_header=f"Unspecified {field_name}",
                                          message_body=f"No {field_name} specified. Check the form and try again.")
@@ -98,14 +111,15 @@ class WebUI:
     @staticmethod
     @__app.route('/print_languagelist')
     def print_languagelist():
-        """Display a single LanguageList and its contents.
+        """Display a selected LanguageList and its contents.
 
         The target LanguageList is specified through the
-        'languagelist' URL query parameter.
+        'languagelist' URL query parameter. If the parameter
+        is missing or the LanguageList does not exist, an
+        error page is displayed instead.
 
         Returns:
-           str: Rendered LanguageList template if found,
-           otherwise an error page.
+            str: Rendered LanguageList template or an error page.
         """
         if "languagelist" not in request.args:
             return render_template("error.html", message_header="Unspecified Language List",
@@ -120,19 +134,38 @@ class WebUI:
     @staticmethod
     @__app.route('/show_languagelist_contents')
     def show_languagelist_contents():
+        """Display a form for selecting a LanguageList.
 
+        Returns:
+            str: Rendered template containing a list of
+            available LanguageLists for user selection.
+        """
         return render_template('print/show_languagelist_contents.html',
                                languagelists=WebUI.__all_languagelists)
 
     @staticmethod
     @__app.route('/create_languagelist')
     def create_languagelist():
+        """Display the LanguageList creation form.
 
+        Returns:
+            str: Rendered template for entering a new
+            LanguageList name and description.
+        """
         return render_template('create/create_languagelist.html')
 
     @staticmethod
     @__app.route('/do_create_languagelist', methods=['GET', 'POST'])
     def do_create_languagelist():
+        """Create a new LanguageList.
+
+        Validates submitted form data, verifies that the
+        LanguageList does not already exist, creates it,
+        and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
         name, error = WebUI.validate_input("name")
         if name is None:
             return error
@@ -152,12 +185,26 @@ class WebUI:
     @staticmethod
     @__app.route('/create_language')
     def create_language():
+        """Display the Language creation form.
 
+        Returns:
+            str: Rendered template for entering a new
+            Language.
+        """
         return render_template('create/create_language.html')
 
     @staticmethod
     @__app.route('/do_create_language', methods=['GET', 'POST'])
     def do_create_language():
+        """Create a new Language.
+
+        Validates submitted form data, verifies that the
+        Language does not already exist, creates it,
+        and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
         name, error = WebUI.validate_input("name")
         if name is None:
             return error
@@ -185,12 +232,27 @@ class WebUI:
     @staticmethod
     @__app.route('/create_languageexposure')
     def create_languageexposure():
+        """Display the LanguageExposure creation form.
 
+        Returns:
+            str: Rendered template for entering a new
+            LanguageExposure object.
+        """
         return render_template('create/create_languageexposure.html')
 
     @staticmethod
     @__app.route('/do_create_languageexposure', methods=['GET', 'POST'])
     def do_create_languageexposure():
+        """Create a new LanguageExposure.
+
+        Validates submitted form data, verifies that the
+        Language does not already exist, creates the
+        LanguageExposure object, and displays a
+        confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
         name, error = WebUI.validate_input("name")
         if name is None:
             return error
@@ -229,11 +291,27 @@ class WebUI:
     @staticmethod
     @__app.route('/join_languagelists')
     def join_languagelists():
+        """Display the LanguageList join form.
+
+        Returns:
+            str: Rendered template for selecting two
+            LanguageLists to combine.
+        """
         return render_template('create/join_languagelists.html', languagelists=WebUI.__all_languagelists)
 
     @staticmethod
     @__app.route('/do_join_languagelist', methods=['GET', 'POST'])
     def do_join_languagelist():
+        """Join two LanguageLists.
+
+        Validates submitted LanguageLists, verifies that
+        the resulting combined list does not already
+        exist, creates the new LanguageList, and displays
+        a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
         first_key, error = WebUI.validate_input("first_languagelist")
         if first_key is None:
             return error
@@ -263,11 +341,25 @@ class WebUI:
     @staticmethod
     @__app.route('/update_language')
     def update_language():
+        """Display the Language update form.
+
+        Returns:
+            str: Rendered template for selecting a
+            Language to update.
+        """
         return render_template('update/update_language.html', languages=WebUI.__all_languages)
 
     @staticmethod
     @__app.route('/do_update_language', methods=['GET', 'POST'])
     def do_update_language():
+        """Update an existing Language.
+
+        Updates the application domain of the selected
+        Language and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
         key, error = WebUI.validate_input("language")
         if key is None:
             return error
@@ -282,6 +374,178 @@ class WebUI:
         language.update_application_domain(application_domain)
         return render_template("update/confirm_language_updated.html", language=language)
 
+    @staticmethod
+    @__app.route('/add_language_to_languagelist')
+    def add_language_to_languagelist():
+        """Display the add-to-LanguageList form.
+
+        Returns:
+            str: Rendered template for selecting a
+            Language and LanguageList.
+        """
+        return render_template('update/add_language_to_languagelist.html',
+                               languages=WebUI.__all_languages,
+                               languagelists=WebUI.__all_languagelists)
+
+    @staticmethod
+    @__app.route('/do_add_language_to_languagelist', methods=['GET', 'POST'])
+    def do_add_language_to_languagelist():
+        """Add a Language to a LanguageList.
+
+        Validates submitted selections, verifies that the
+        Language is not already present, adds it to the
+        LanguageList, and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
+        language_key, error = WebUI.validate_input("language")
+        if language_key is None:
+            return error
+        language = Language.lookup(language_key)
+        if language is None:
+            return render_template("error.html", message_header="Language does not exist",
+                                   message_body=f"Language {language_key} does not exist. Choose another language.")
+
+        languagelist_key, error = WebUI.validate_input("languagelist")
+        if languagelist_key is None:
+            return error
+        languagelist = LanguageList.lookup(languagelist_key.lower())
+        if languagelist is None:
+            return render_template("error.html", message_header=f"Language List {languagelist_key} does not exist",
+                                   message_body=f"Language List {languagelist_key} was not found. Choose another one.")
+        if language in languagelist:
+            return render_template("error.html", message_header=f"Language {language.get_name()} already in Language List",
+                                   message_body=f"Language {language.get_name()} already exists in Language List {languagelist.get_name()}.")
+        languagelist.append(language)
+        return render_template("update/confirm_language_added_to_languagelist.html",
+                               language=language, languagelist=languagelist)
+
+    @staticmethod
+    @__app.route('/remove_language_from_languagelist')
+    def remove_language_from_languagelist():
+        """Display the remove-from-LanguageList form.
+
+        Returns:
+            str: Rendered template for selecting a
+            Language and LanguageList.
+        """
+        return render_template('update/remove_language_from_languagelist.html',
+                               languages=WebUI.__all_languages,
+                               languagelists=WebUI.__all_languagelists)
+
+
+    @staticmethod
+    @__app.route('/do_remove_language_from_languagelist', methods=['GET', 'POST'])
+    def do_remove_language_from_languagelist():
+        """Remove a Language from a LanguageList.
+
+        Validates submitted selections, verifies that the
+        Language exists in the specified LanguageList,
+        removes it, and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
+        language_key, error = WebUI.validate_input("language")
+        if language_key is None:
+            return error
+        language = Language.lookup(language_key)
+        if language is None:
+            return render_template("error.html", message_header="Language does not exist",
+                                   message_body=f"Language {language_key} does not exist. Choose another language.")
+        languagelist_key, error = WebUI.validate_input("languagelist")
+        if languagelist_key is None:
+            return error
+        languagelist = LanguageList.lookup(languagelist_key.lower())
+        if languagelist is None:
+            return render_template("error.html", message_header=f"Language List {languagelist_key} does not exist",
+                                   message_body=f"Language List {languagelist_key} was not found. Choose another one.")
+        if languagelist.get_name() == LanguageList.ALL_LANGUAGES:
+            return render_template("error.html", message_header="Cannot remove the Language",
+                                   message_body=f"Language is not allowed to be removed from {LanguageList.ALL_LANGUAGES} Language List.")
+        if language not in languagelist:
+            return render_template("error.html", message_header=f"Language {language.get_name()} is not in Language List",
+                                   message_body=f"Language {language.get_name()} does not exist in Language List {languagelist.get_name()}.")
+        languagelist.remove(language)
+        return render_template("update/confirm_language_removed_from_languagelist.html",
+                               language=language, languagelist=languagelist)
+
+    @staticmethod
+    @__app.route('/delete_languagelist')
+    def delete_languagelist():
+        """Display the LanguageList deletion form.
+
+        Returns:
+            str: Rendered template for selecting a
+            LanguageList to delete.
+        """
+        return render_template('delete/delete_languagelist.html',
+                               languagelists=WebUI.__all_languagelists)
+
+    @staticmethod
+    @__app.route('/do_delete_languagelist', methods=['GET', 'POST'])
+    def do_delete_languagelist():
+        """Delete a LanguageList.
+
+        Validates the selected LanguageList, prevents
+        deletion of the All Languages list, removes the
+        LanguageList, and displays a confirmation page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
+        languagelist_key, error = WebUI.validate_input("languagelist")
+        if languagelist_key is None:
+            return error
+        languagelist = LanguageList.lookup(languagelist_key.lower())
+        if languagelist is None:
+            return render_template("error.html", message_header=f"Language List {languagelist_key} does not exist",
+                                   message_body=f"Language List {languagelist_key} was not found. Choose another one.")
+        if languagelist.get_name() == LanguageList.ALL_LANGUAGES:
+            return render_template("error.html", message_header="Cannot delete the Language List",
+                                   message_body=f"Language List {LanguageList.ALL_LANGUAGES} cannot be removed.")
+        WebUI.__all_languagelists.remove(languagelist)
+        languagelist.delete()
+        return render_template("delete/confirm_languagelist_deleted.html", languagelist=languagelist)
+
+    @staticmethod
+    @__app.route('/delete_language')
+    def delete_language():
+        """Display the Language deletion form.
+
+        Returns:
+            str: Rendered template for selecting a
+            Language to delete.
+        """
+        return render_template('delete/delete_language.html',
+                               languages=WebUI.__all_languages)
+
+    @staticmethod
+    @__app.route('/do_delete_language', methods=['GET', 'POST'])
+    def do_delete_language():
+        """Delete a Language.
+
+        Removes the selected Language from all LanguageLists,
+        deletes it from storage, and displays a confirmation
+        page.
+
+        Returns:
+            str: Confirmation page or an error page.
+        """
+        language_key, error = WebUI.validate_input("language")
+        if language_key is None:
+            return error
+        language = Language.lookup(language_key)
+        if language is None:
+            return render_template("error.html", message_header="Language does not exist",
+                                   message_body=f"Language {language_key} does not exist. Choose another language.")
+        for languagelist in WebUI.__all_languagelists:
+            if language in languagelist:
+                languagelist.remove(language)
+        language.delete()
+        return render_template("delete/confirm_language_deleted.html", language=language)
+
     @classmethod
     def run(cls):
         """Start the Flask web application server.
@@ -292,10 +556,7 @@ class WebUI:
 
 
 if __name__ == '__main__':
-    """Run the WebUI application.
-
-    This block executes when the module is run directly.
-    It initializes application data and starts the Flask server.
-    """
+    # This block executes when the module is run directly.
+    # Initialize application data and start the Flask server.
     WebUI().init()
     WebUI().run()

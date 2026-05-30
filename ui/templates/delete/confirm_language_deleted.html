@@ -1,0 +1,6 @@
+{% extends "default.html" %}
+{% block title %}Language List {{ language.get_name() }} deleted{%  endblock %}
+{% block header %}Deleted Language is:{% endblock %}
+{% block content %}
+    <p>{{ language.to_html()|safe }}</p>
+{% endblock %}
