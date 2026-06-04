@@ -2,40 +2,55 @@
 
 File: WebUI.py
 Author: Alexander Leykand
-Date: 05/30/2026
-Assignment: Module 8
+Date: 06/03/2026
+Assignment: Module 9
+
+Flask-based web interface for the Language Catalog application.
 
 This module defines the WebUI class, which manages browser-based
-interaction with Language and LanguageList objects using the
-Flask web framework. It supports rendering HTML templates,
-displaying language data, and handling user requests through
-URL routes.
+interaction with Language, LanguageList, LanguageExposure, and User
+objects using the Flask web framework.
+
+It supports:
+    - Rendering HTML templates
+    - Displaying and managing language data
+    - User authentication (login/logout/session handling)
+    - Handling user requests through URL routes
 
 The module serves as the main entry point for the web version
-of the application and initializes application data from the
-database before starting the Flask development server.
+of the application, initializing application data from the
+database and launching the Flask development server over HTTPS.
 """
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
+from pymongo import ssl_context
+from data.Database import Database
 from logic.LanguageList import LanguageList
 from logic.Language import Language
 from logic.LanguageExposure import LanguageExposure
+from logic.User import User
+from logic.utilities import get_ini_file
+from flask_session import Session
+import bcrypt
 
 
 class WebUI:
     """Provide a Flask-based web interface for the Language Catalog application.
 
     This class manages:
-        - Initialization of language and language list data
-        - Flask route registration
-        - Rendering of HTML templates
-        - User interaction through browser-based pages
+        - Initialization of application data (languages, language lists, users)
+        - Flask route registration and request handling
+        - User authentication and session management
+        - Rendering of HTML templates for browser interaction
+        - CRUD operations for languages and language lists
 
-    The application supports viewing and managing programming
-    languages and categorized language lists.
+    The application supports viewing, creating, updating, and deleting
+    programming languages and language lists, as well as user login and
+    session-based access control.
     """
     __all_languages = None
     __all_languagelists = None
     __app = Flask(__name__)
+    ALLOWED_PATHS = ["/login", "/do_login", "/static/language_catalog.css"]
     MENU = {
         "Print": {"print_languagelist?languagelist=All%20Languages": "Print a list of all languages.",
                   "print_languagelists": "Print a list of all Language Lists.",
@@ -85,10 +100,29 @@ class WebUI:
         return field_value, None
 
     @staticmethod
-    @__app.route('/')
+    @__app.before_request
+    def before_request():
+        """Enforce authentication before processing requests.
+
+        Checks whether a user is currently authenticated and
+        stored in the session. If no authenticated user exists
+        and the requested path is not publicly accessible,
+        redirects the client to the login page.
+
+        Returns:
+            Response | None: A redirect response to the login
+            page when authentication is required; otherwise
+            None to allow normal request processing.
+        """
+        if "user" not in session:
+            if request.path not in WebUI.ALLOWED_PATHS:
+                return redirect(url_for("login"))
+
+    @staticmethod
     @__app.route('/index')
     @__app.route('/index.html')
     @__app.route('/index.php')
+    @__app.route('/')
     def homepage():
         """Render the application homepage.
 
@@ -464,7 +498,7 @@ class WebUI:
                                    message_body=f"Language List {languagelist_key} was not found. Choose another one.")
         if languagelist.get_name() == LanguageList.ALL_LANGUAGES:
             return render_template("error.html", message_header="Cannot remove the Language",
-                                   message_body=f"Language is not allowed to be removed " 
+                                   message_body=f"Language is not allowed to be removed "
                                                 f"from {LanguageList.ALL_LANGUAGES} Language List.")
         if language not in languagelist:
             return render_template("error.html",
@@ -550,13 +584,105 @@ class WebUI:
         language.delete()
         return render_template("delete/confirm_language_deleted.html", language=language)
 
+    @staticmethod
+    @__app.route('/get_user')
+    def get_user():
+        """ This is a test method to retrieve the session user. """
+        if "username" in session:
+            return session["username"]
+        else:
+            return "No user is set"
+
+    @staticmethod
+    @__app.route('/set_user')
+    def set_user():
+        """ This is a test method to establish the session user. """
+        if "username" in request.args:
+            session["username"] = request.args["username"]
+            return "User set"
+        if "username" in session:
+            del session["username"]
+        return "User cleared"
+
+    @staticmethod
+    @__app.route('/login')
+    def login():
+        """Render the login page.
+
+        Displays the HTML form for user authentication.
+
+        Returns:
+            str: Rendered login page template.
+        """
+        return render_template("user/login.html")
+
+    @staticmethod
+    @__app.route('/do_login', methods=['GET', 'POST'])
+    def do_login():
+        """Authenticate a user and establish a session.
+
+        Validates submitted username and password, verifies the
+        user against stored credentials, and logs the user into
+        the session if authentication succeeds. If authentication
+        fails, an error page is returned.
+
+        Returns:
+            Response: Redirect to homepage on success, or rendered
+            error page on failure.
+        """
+        username, error = WebUI.validate_input("username")
+        if error is not None:
+            return error
+        password, error = WebUI.validate_input("password")
+        if error is not None:
+            return error
+        user = User.read_user(username)
+        if user is None:
+            return render_template("error.html",
+                                   message_header="Login failed",
+                                   message_body="Invalid account credentials. Please try again.")
+        logged_in = user.verify_password(password)
+        if not logged_in:
+            return render_template("error.html",
+                                   message_header="Login failed",
+                                   message_body="Invalid account credentials. Please try again.")
+        session["user"] = user
+        return redirect(url_for("homepage"))
+
+
+    @staticmethod
+    @__app.route('/logout')
+    def logout():
+        """Log out the current user.
+
+        Removes the user from the session if present and redirects
+        to the login page.
+
+        Returns:
+            Response: Redirect to the login page.
+        """
+        if "user" in session:
+            del session["user"]
+        return redirect(url_for("login"))
+
     @classmethod
     def run(cls):
         """Start the Flask web application server.
 
-        Launches the application on port 8000.
+        Configures session handling and launches the Flask
+        development server over HTTPS using a self-signed
+        certificate.
+
+        The server listens on all network interfaces on port 8443.
+
+        Returns:
+            None
         """
-        cls.__app.run(host="0.0.0.0", port=8000)
+        cls.__app.secret_key = bcrypt.gensalt()
+        cls.__app.config["SESSION_TYPE"] = "filesystem"
+        Session(cls.__app)
+        path, file = get_ini_file(Database.APP_NAME)
+        cls.__app.run(host="0.0.0.0", port=8443, ssl_context=(path + "/cert.pem", path + "/key.pem"))
 
 
 if __name__ == '__main__':

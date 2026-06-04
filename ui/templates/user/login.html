@@ -1,0 +1,12 @@
+{% extends "default.html" %}
+{% block title %}Account Login{%  endblock %}
+{% block header %}Enter the Account User / Password:{% endblock %}
+{% block content %}
+    <form method="POST" action="do_login">
+        <table class="data_entry_form">
+            <tr><th><label>User Name:</label></th><td><input type="text" name="username"></td></tr>
+            <tr><th><label>Password:</label></th><td><input type="password" name="password"></td></tr>
+            <tr><th colspan="2"><button type="submit">LOGIN</button></th></tr>
+        </table>
+    </form>
+{% endblock %}

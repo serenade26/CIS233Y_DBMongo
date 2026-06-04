@@ -4,9 +4,22 @@
 .data_entry_form td {
     text-align: left;
 }
-.data_entry_form input[type="text"] {
+.data_entry_form input[type="text"],
+.data_entry_form input[type="password"]
+{
     width: 400px;
 }
 .data_entry_form {
     padding: 2em;
+}
+.top_button {
+    padding: .5em;
+    float: right;
+    color: white;
+    background: darkgray;
+    margin: .2em;
+    font-weight: bold;
+}
+.top_button a {
+    text-decoration: none
 }
